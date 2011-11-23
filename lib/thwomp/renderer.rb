@@ -33,6 +33,7 @@ module Thwomp
 
     # returns PNG data from given frame
     def png_data(frame)
+      puts "Rendering frame #{frame}. Does it exts? #{frame_exists(frame)}" if verbose
       frame_exists?(frame) ? frame_data(frame) : nil
     end
 
@@ -82,7 +83,9 @@ module Thwomp
       unless @frame_filename[frame]
         frame_filename = frame_output_filename(frame)
 
-        `#{self.class.gnash_binary} -s1 --screenshot=#{frame} --screenshot-file #{frame_filename} -1 -r1 --timeout 200 #{filename} -j #{max_width} -k #{max_height} > /dev/null 2>&1`
+        command = "#{self.class.gnash_binary} -s1 --screenshot=#{frame} --screenshot-file #{frame_filename} -1 -r1 --timeout 200 #{filename} -j #{max_width} -k #{max_height} > /dev/null 2>&1"
+        puts command if verbose
+        `#{command}`
 
         @frame_filename[frame] = $?.success? ? frame_filename : false
       end
