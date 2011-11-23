@@ -33,7 +33,7 @@ module Thwomp
 
     # returns PNG data from given frame
     def png_data(frame)
-      puts "Rendering frame #{frame}. Does it exts? #{frame_exists(frame)}" if verbose
+      puts "Rendering frame #{frame}. Does it exts? #{frame_exists?(frame)}" if verbose
       frame_exists?(frame) ? frame_data(frame) : nil
     end
 
