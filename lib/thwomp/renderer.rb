@@ -5,11 +5,13 @@ module Thwomp
   # Renders SWF files
   class Renderer
 
-    attr_accessor :url, :max_width, :max_height, :max_frames
+    attr_accessor :url, :max_width, :max_height, :max_frames, :local, :verbose
 
     DEFAULT_OPTIONS = { :max_width => 500,
                         :max_height => 500,
-                        :max_frames => 10 }
+                        :max_frames => 10,
+                        :local => false,
+                        :verbose => false }
 
     # Initializer the Thwomp renderer
     #
@@ -17,6 +19,8 @@ module Thwomp
     #   :max_width        Maximum width of renderer
     #   :max_height       Maximum height of renderer
     #   :max_frames       Maximum number of frames the renderer can handle
+    #   :local            If +url+ is a local file, set this option to true
+    #   :verbose          If set to true, Thwomp will output debug information
     def initialize(url, options = {})
       DEFAULT_OPTIONS.merge(options).each { |k,v| send(:"#{k}=", v) if v }
       @url = url
@@ -39,7 +43,9 @@ module Thwomp
       frame_batch = frames.join(',')
       file_mask   = frame_output_filename('%f')
 
-      `#{self.class.gnash_binary} -s1 --screenshot=#{frame_batch} --screenshot-file=#{file_mask} -1 -r1 --timeout 200 #{filename} -j #{max_width} -k #{max_height} > /dev/null 2>&1`
+      command = "#{self.class.gnash_binary} -s1 --screenshot=#{frame_batch} --screenshot-file=#{file_mask} -1 -r1 --timeout 200 #{filename} -j #{max_width} -k #{max_height} > /dev/null 2>&1"
+      puts command if verbose
+      `#{command}`
 
       success = $?.success?
 
@@ -85,7 +91,11 @@ module Thwomp
     end
 
     def filename
-      downloader.filename
+      if local
+        @url
+      else
+        downloader.filename
+      end
     end
 
     # returns the downloader
